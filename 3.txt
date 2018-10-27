@@ -1,0 +1,271 @@
+
+import java.io.*;
+import java.util.*;
+
+class Cutplant {
+    public static Node[] constructST(int arr[],int n){
+        int x=(int)(Math.ceil(Math.log(n)/Math.log(2)));
+        int max=2*(int)(Math.pow(2,x))-1;
+        Node st[]=new Node[max];
+        constructSTUtil(arr,0,n-1,st,0);
+        return st;
+    }
+
+    public static int getMid(int s, int e) {  
+        return s + (e -s)/2;  
+    }
+
+    public static void constructSTUtil(int arr[],int ss,int se,Node st[],int si){
+        if(ss==se){
+            //System.out.println(si+" "+ss);
+            Node tmp=new Node();
+            tmp.minimum=arr[ss];
+            tmp.maximum = arr[ss];
+            st[si]=tmp;
+            return ;
+        }
+        int mid=getMid(ss,se);
+        constructSTUtil(arr, ss, mid, st, si*2+1);
+        constructSTUtil(arr, mid+1, se, st, si*2+2);
+        Node tmp=new Node();
+        tmp.minimum = Math.min(st[si*2+1].minimum, st[si*2+2].minimum);
+        tmp.maximum = Math.max(st[si*2+1].maximum, st[si*2+2].maximum);
+        st[si]=tmp;
+    }
+    public static Node MaxMin(Node st[],int n,int qs,int qe){
+        Node tmp=new Node();
+        if(qs<0||qe>n-1||qs>qe){
+            tmp.minimum = Integer.MIN_VALUE;
+            tmp.minimum =Integer.MAX_VALUE;
+            return tmp;
+        }
+        return MaxMinUntill(st, 0, n-1, qs, qe, 0);
+    }
+
+    public static Node MaxMinUntill(Node st[],int ss,int se,int qs,int qe,int index){
+        Node tmp,left,right;
+        tmp=new Node();
+        if(qs<=ss&&qe>=se){
+            return st[index];
+        }
+        if(se < qs || ss > qe){
+            tmp.minimum = Integer.MIN_VALUE;
+            tmp.minimum =Integer.MAX_VALUE;
+            return tmp;
+        }
+        int mid = getMid(ss, se);
+        left = MaxMinUntill(st, ss, mid, qs, qe, 2*index+1);
+        right=MaxMinUntill(st, mid+1, se, qs, qe, 2*index+2);
+        tmp.minimum=Math.min(left.minimum, right.minimum);
+        tmp.maximum=Math.max(left.maximum, right.maximum);
+        return tmp;
+    }
+
+    public static void main(String[] args) throws java.lang.Exception {
+        InputReader in = new InputReader(System.in);
+        StringBuffer str = new StringBuffer();
+        int t, n, i, j, q;
+        t = in.nextInt();
+        for (i = 1; i <= t; i++) {
+            n = in.nextInt();
+            int a[] = new int[n];
+            boolean flag=true;
+            for (j = 0; j < n; j++) {
+                a[j] = in.nextInt();
+            }
+            int b[] = new int[n];
+            for (j = 0; j < n; j++) {
+                b[j] = in.nextInt();
+                if(a[j]<b[j])
+                    flag=false;
+            }
+            if(flag==false){
+                str.append(-1+"\n");
+                continue;
+            }
+            Node aa[]=constructST(a,n);
+            Node bb[]=constructST(b,n);
+            int count=0;
+            HashMap <Integer,Integer> hm=new HashMap<Integer,Integer>();
+            for(j=0;j<n;j++){
+                //System.out.println("count= "+count);
+                if(a[j]==b[j]){
+                    continue;
+                }
+                if(hm.containsKey(b[j])==false){
+                    count++;
+                    hm.put(b[j],j);
+                    continue;
+                }
+                int sv=hm.get(b[j]);
+                //System.out.println(sv);
+                int qs=sv;
+                int qe=j;
+                Node a_min=MaxMin(aa,n,qs,qe);
+                Node b_max=MaxMin(bb,n,qs,qe);
+                int min=a_min.minimum;
+                int max=b_max.maximum;
+                //System.out.println(max+" "+min+" "+b[j]+" "+j);
+                if(max<=b[j]&&min>=b[j]){                    
+                    hm.put(b[j],j);
+                    continue;
+                }else{
+                    count++;
+                    hm.put(b[j],j);
+                    continue;
+                }
+                
+            }
+            
+            str.append(count+"\n");
+        }
+        System.out.println(str);
+    }
+    static class Node{
+        int minimum;
+        int maximum;
+    }
+    static class InputReader {
+
+        private InputStream stream;
+        private byte[] buf = new byte[1024];
+        private int curChar;
+        private int numChars;
+
+        public InputReader(InputStream stream) {
+            this.stream = stream;
+        }
+
+        public int read() {
+            if (numChars == -1) {
+                throw new UnknownError();
+            }
+            if (curChar >= numChars) {
+                curChar = 0;
+                try {
+                    numChars = stream.read(buf);
+                } catch (IOException e) {
+                    throw new UnknownError();
+                }
+                if (numChars <= 0) {
+                    return -1;
+                }
+            }
+            return buf[curChar++];
+        }
+
+        public int peek() {
+            if (numChars == -1) {
+                return -1;
+            }
+            if (curChar >= numChars) {
+                curChar = 0;
+                try {
+                    numChars = stream.read(buf);
+                } catch (IOException e) {
+                    return -1;
+                }
+                if (numChars <= 0) {
+                    return -1;
+                }
+            }
+            return buf[curChar];
+        }
+
+        public void skip(int x) {
+            while (x-- > 0) {
+                read();
+            }
+        }
+
+        public int nextInt() {
+            return Integer.parseInt(next());
+        }
+
+        public long nextLong() {
+            return Long.parseLong(next());
+        }
+
+        public String nextString() {
+            return next();
+        }
+
+        public String next() {
+            int c = read();
+            while (isSpaceChar(c)) {
+                c = read();
+            }
+            StringBuffer res = new StringBuffer();
+            do {
+                res.appendCodePoint(c);
+                c = read();
+            } while (!isSpaceChar(c));
+
+            return res.toString();
+        }
+
+        public String nextLine() {
+            StringBuffer buf = new StringBuffer();
+            int c = read();
+            while (c != '\n' && c != -1) {
+                if (c != '\r') {
+                    buf.appendCodePoint(c);
+                }
+                c = read();
+            }
+            return buf.toString();
+        }
+
+        public double nextDouble() {
+            int c = read();
+            while (isSpaceChar(c)) {
+                c = read();
+            }
+            int sgn = 1;
+            if (c == '-') {
+                sgn = -1;
+                c = read();
+            }
+            double res = 0;
+            while (!isSpaceChar(c) && c != '.') {
+                if (c == 'e' || c == 'E') {
+                    return res * Math.pow(10, nextInt());
+                }
+                if (c < '0' || c > '9') {
+                    throw new InputMismatchException();
+                }
+                res *= 10;
+                res += c - '0';
+                c = read();
+            }
+            if (c == '.') {
+                c = read();
+                double m = 1;
+                while (!isSpaceChar(c)) {
+                    if (c == 'e' || c == 'E') {
+                        return res * Math.pow(10, nextInt());
+                    }
+                    if (c < '0' || c > '9') {
+                        throw new InputMismatchException();
+                    }
+                    m /= 10;
+                    res += (c - '0') * m;
+                    c = read();
+                }
+            }
+            return res * sgn;
+        }
+
+        public boolean hasNext() {
+            int value;
+            while (isSpaceChar(value = peek()) && value != -1) {
+                read();
+            }
+            return value != -1;
+        }
+
+        private boolean isSpaceChar(int c) {
+            return c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == -1;
+        }
+    }
+}
