@@ -1,0 +1,72 @@
+t=int(input())
+for i in range(t):
+    n,s,y=map(int,input().split())
+    v=list(map(int,input().split()))
+    d=list(map(int,input().split()))
+    p=list(map(int,input().split()))
+    c=list(map(int,input().split()))
+    temp=0.000001
+    time=0
+    man=y/s
+    for j in range(n):
+        if(d[j]==0):
+            ub=p[j]-time*v[j]
+            lb=ub+c[j]
+            if(ub<-temp and lb<-temp):
+                time=time+man
+                continue
+            if(ub<=0 and lb>=0):
+                time=time+man+abs(lb)/v[j]+temp/v[j]
+                continue
+            if(ub<=temp and ub>=0):
+                time=time+man+ub/v[j]+c[j]/v[j]+temp/v[j]
+                continue
+            if(lb>0 and lb<=temp):
+                time=time+man+abs(lb)/v[j]+temp/v[j]
+                continue
+            if(lb<=0 and lb>=-temp):
+                time=time+man+(temp-abs(lb))/v[j]
+                continue
+            if(ub<-temp and lb>temp):
+                time=time+man+(abs(lb))/v[j]+temp/v[j]
+                continue
+            if(ub>temp and lb>temp):
+                xy=ub-temp
+                xy=xy/v[j]
+                ff=xy-man
+                if(ff>0):
+                    time=time+man
+                else:
+                    time=time+man+ub/v[j]+c[j]/v[j]+temp/v[j]
+                continue
+        else:
+            ub=p[j]+time*v[j]
+            lb=ub-c[j]
+            if(ub>temp and lb>temp):
+                time=time+man
+                continue
+            if(ub>=0 and lb<=0):
+                time=time+man+abs(lb)/v[j]+temp/v[j]
+                continue
+            if(ub>=temp and ub<=0):
+                time=time+man-ub/v[j]+c[j]/v[j]+temp/v[j]
+                continue
+            if(lb<0 and lb>-temp):
+                time=time+man+abs(lb)/v[j]
+                continue
+            if(lb>=0 and lb<=temp):
+                time=time+man+(temp-abs(lb))/v[j]
+                continue
+            if(ub>temp and lb<-temp):
+                time=time+man+abs(lb)/v[j]+temp/v[j]
+                continue
+            if(ub<-temp and lb<-temp):
+                xy=-ub-temp
+                xy=xy/v[j]
+                ff=xy-man
+                if(ff>0):
+                    time=time+man
+                else:
+                    time=time+man-ub/v[j]+c[j]/v[j]+temp/v[j]
+                continue
+    print(time)
